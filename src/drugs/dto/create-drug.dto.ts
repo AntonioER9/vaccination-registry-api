@@ -19,12 +19,18 @@ export class CreateDrugDto {
   @IsBoolean()
   approved: boolean;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Drug min dose',
+    nullable: false,
+  })
   @IsNumber()
   @IsPositive()
   min_dose: number;
   
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Drug max dose',
+    nullable: false,
+  })
   @IsNumber()
   @IsPositive()
   max_dose: number;
