@@ -3,7 +3,6 @@ import { AuthService } from './auth.service';
 import { CreateUserDto, LoginUserDto } from './dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/auth/entities/user.entity';
-import { Auth, GetUser } from 'src/auth/decorators';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -23,14 +22,6 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   loginUser(@Body() loginUserDto: LoginUserDto) {
     return this.authService.login(loginUserDto);
-  }
-
-  @Get('check-status')
-  @Auth()
-  checkAuthStatus(
-    @GetUser() user: User //me devuelve el usuario que ingreso
-  ) {
-    return this.authService.checkAuthStatus(user);
   }
 
 }

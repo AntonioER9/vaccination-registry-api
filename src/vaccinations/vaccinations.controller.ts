@@ -2,8 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { VaccinationsService } from './vaccinations.service';
 import { CreateVaccinationDto } from './dto/create-vaccination.dto';
 import { UpdateVaccinationDto } from './dto/update-vaccination.dto';
-import { Auth, GetUser } from 'src/auth/decorators';
-import { User } from 'src/auth/entities/user.entity';
+import { Auth } from 'src/auth/decorators';
 
 @Controller('vaccinations')
 export class VaccinationsController {
@@ -13,7 +12,6 @@ export class VaccinationsController {
   @Auth()
   create(
     @Body() createVaccinationDto: CreateVaccinationDto,
-    @GetUser() user: User,
   ) {
     return this.vaccinationsService.create(createVaccinationDto);
   }
