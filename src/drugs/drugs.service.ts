@@ -50,8 +50,7 @@ export class DrugsService {
       drug = await this.drugRepository.findOneBy({ id: term });
     } 
 
-    if (!drug)
-      throw new NotFoundException(`Drug with ${term} not found`);
+    if (!drug) throw new NotFoundException(`Drug with ${term} not found`);
 
     return drug;
   }

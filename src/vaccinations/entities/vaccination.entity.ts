@@ -7,9 +7,7 @@ export class Vaccination {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column('text', {
-        unique: true
-    })
+    @Column('text')
     name: string;
 
     @Column('int')
