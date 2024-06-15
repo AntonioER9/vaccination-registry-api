@@ -38,7 +38,7 @@ export class DrugsController {
 
   @Put(':id')
   @Auth()
-  update(@Param('id') id: string, @Body() updateDrugDto: UpdateDrugDto) {
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateDrugDto: UpdateDrugDto) {
     return this.drugsService.update(id, updateDrugDto);
   }
 

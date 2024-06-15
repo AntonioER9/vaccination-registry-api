@@ -20,8 +20,8 @@ export class Vaccination {
 
     @ManyToOne(
       () => Drug,
-      (drug) => drug.id,
-      { onDelete: 'CASCADE' }
+      (drug) => drug.vaccination,
+      { eager: true }
     )
     drug: Drug
     

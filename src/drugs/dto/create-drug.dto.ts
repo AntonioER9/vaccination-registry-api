@@ -36,7 +36,7 @@ export class CreateDrugDto {
   max_dose: number;
   
   @ApiProperty({
-    description: 'Drug available at date'
+    description: 'Drug available date'
   })
   @IsDateString()
   available_at: Date;

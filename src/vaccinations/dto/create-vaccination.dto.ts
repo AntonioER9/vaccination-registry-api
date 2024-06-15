@@ -5,25 +5,29 @@ export class CreateVaccinationDto {
 
 
   @ApiProperty({
-    description: 'Drug name',
+    description: 'Name of the person who will be vaccinated',
     nullable: false,
     minLength: 1
   })
   @IsString()
   name: string;
 
-  @IsString()
-  drug_id: string;
-
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Vaccination dose'
+  })
   @IsNumber()
   @IsPositive()
   dose: number;
-  
+
   @ApiProperty({
-    description: ''
+    description: 'Vaccination date'
   })
   @IsDateString()
   date: Date;
 
+  @ApiProperty({
+    description: 'Drug Id'
+  })
+  @IsString()
+  drugId: string;
 }

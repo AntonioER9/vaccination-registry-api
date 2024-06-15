@@ -25,12 +25,10 @@ export class Drug {
     @Column('date')
     available_at: Date;
     
-    @ApiProperty()
     @OneToMany(
       () => Vaccination,
       (vaccination) => vaccination.drug,
-      { cascade: true, eager: true }
     )
-    vaccinations?: Vaccination[];
+    vaccination: Vaccination;
 
 }
