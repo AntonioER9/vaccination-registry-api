@@ -29,6 +29,6 @@ export class Drug {
       () => Vaccination,
       (vaccination) => vaccination.drug,
     )
-    vaccination: Vaccination;
+    vaccination?: Vaccination;
 
 }
