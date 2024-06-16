@@ -6,6 +6,8 @@ import { CreateDrugDto } from 'src/drugs/dto/create-drug.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { mockDrugsService } from 'src/drugs/tests/__mocks__/drugs.service';
 import { UpdateDrugDto } from 'src/drugs/dto/update-drug.dto';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 
 describe('DrugsController', () => {
   let controller: DrugsController;
@@ -13,6 +15,13 @@ describe('DrugsController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        PassportModule.register({ defaultStrategy: 'jwt' }),
+        JwtModule.register({
+          secret: 'your-secret-key',
+          signOptions: { expiresIn: '60s' },
+        }),
+      ],
       controllers: [DrugsController],
       providers: [
         {

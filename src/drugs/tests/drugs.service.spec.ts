@@ -1,4 +1,6 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { JwtModule } from "@nestjs/jwt";
+import { PassportModule } from "@nestjs/passport";
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { PaginationDto } from "src/common/dtos/pagination.dto";
@@ -16,6 +18,13 @@ describe('DrugsService with data', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        PassportModule.register({ defaultStrategy: 'jwt' }),
+        JwtModule.register({
+          secret: 'your-secret-key', 
+          signOptions: { expiresIn: '60s' },
+        }),
+      ],
       providers: [
         DrugsService,
         {

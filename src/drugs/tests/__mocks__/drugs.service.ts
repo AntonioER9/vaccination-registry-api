@@ -1,5 +1,5 @@
 export const mockDrugsService = {
-  create: jest.fn(dto => ({ id: 'a uuid', ...dto })),
+  create: jest.fn(dto => ({ id: '6a3a6c18-2197-4f27-8e44-e8c87cd1d5a6', ...dto })),
   findAll: jest.fn(() => [
     {
       id: '6a3a6c18-2197-4f27-8e44-e8c87cd1d5a6',
