@@ -3,7 +3,7 @@ import { AuthController } from 'src/auth/auth.controller';
 import { AuthService } from 'src/auth/auth.service';
 import { CreateUserDto, LoginUserDto } from 'src/auth/dto';
 import { mockAuthService } from 'src/auth/tests/__mocks__/auth.service';
-import { mockCreateUserDto, mockLoginResponse, mockLoginUserDto } from 'src/auth/tests/models/auth.model';
+import { mockCreateUserDto, mockLoginUserResponse, mockLoginUserDto, mockCreateUserResponse } from 'src/auth/tests/models/auth.model';
 describe('AuthController', () => {
   let controller: AuthController;
   let service: AuthService;
@@ -34,9 +34,9 @@ describe('AuthController', () => {
 
       expect(await controller.createUser(createUserDto)).toEqual({
         id: expect.any(String),
-        name: mockCreateUserDto.name,
-        email: mockCreateUserDto.email,
-        password: mockCreateUserDto.password
+        name: mockCreateUserResponse.name,
+        email: mockCreateUserResponse.email,
+        token: mockCreateUserResponse.token
       });
 
       expect(service.create).toHaveBeenCalledWith(createUserDto);
@@ -47,7 +47,7 @@ describe('AuthController', () => {
     it('should login a user', async () => {
       const loginUserDto: LoginUserDto = mockLoginUserDto;
 
-      expect(await controller.loginUser(loginUserDto)).toEqual(mockLoginResponse);
+      expect(await controller.loginUser(loginUserDto)).toEqual(mockLoginUserResponse);
 
       expect(service.login).toHaveBeenCalledWith(loginUserDto);
     });
