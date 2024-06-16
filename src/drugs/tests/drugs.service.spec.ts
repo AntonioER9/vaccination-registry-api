@@ -1,18 +1,18 @@
-import { NotFoundException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
+import { PaginationDto } from "src/common/dtos/pagination.dto";
 import { DrugsService } from "src/drugs/drugs.service";
+import { CreateDrugDto } from "src/drugs/dto/create-drug.dto";
+import { UpdateDrugDto } from "src/drugs/dto/update-drug.dto";
 import { Drug } from "src/drugs/entities/drug.entity";
-import { DrugModel, dummyId, mockDrug } from "src/drugs/tests/models/drug.model";
+import { mockDrugRepository } from "src/drugs/tests/__mocks__/drugs.service";
+import { dummyId, mockDrugDto, mockDrugEntity, mockDrugsEntity } from "src/drugs/tests/models/drug.model";
 import { Repository } from "typeorm";
 
 describe('DrugsService with data', () => {
   let service: DrugsService;
-  let model: Repository<Drug>
-
-const mockDrugService = {
-  findOneBy: jest.fn()
-}
+  let repository: Repository<Drug>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,40 +20,109 @@ const mockDrugService = {
         DrugsService,
         {
           provide: getRepositoryToken(Drug),
-          useValue: mockDrugService,
+          useValue: mockDrugRepository,
         }
       ],
     }).compile();
 
     service = module.get<DrugsService>(DrugsService);
-    model = module.get<Repository<Drug>>(getRepositoryToken(Drug));
+    repository = module.get<Repository<Drug>>(getRepositoryToken(Drug));
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findOne', () => { 
+  describe('create', () => {
+    it('should create a drug', async () => {
+      const createDrugDto: CreateDrugDto = mockDrugDto;
+      const drug = mockDrugEntity;
 
-    it('should be defined', async () => {
-      jest.spyOn(model,'findOneBy').mockResolvedValue(mockDrug);
+      mockDrugRepository.create.mockReturnValue(drug);
+      mockDrugRepository.save.mockResolvedValue(drug);
 
-      const result = await service.findOne(mockDrug.id);
-
-      expect(model.findOneBy).toHaveBeenCalled();
-      expect(result).toEqual(mockDrug);
+      const result = await service.create(createDrugDto);
+      expect(result).toEqual(drug);
+      expect(mockDrugRepository.create).toHaveBeenCalledWith(createDrugDto);
+      expect(mockDrugRepository.save).toHaveBeenCalledWith(drug);
     });
 
-    it('should throw NotFoundException if invalid ID', async() => {
+    it('should handle database errors', async () => {
+      const createDrugDto: CreateDrugDto = mockDrugDto;
+      mockDrugRepository.save.mockRejectedValue({ code: '23505', detail: 'Duplicate entry' });
 
-      const id = 'invalid-id';
+      await expect(service.create(createDrugDto)).rejects.toThrow(BadRequestException);
+    });
+  });
 
-      await expect(service.findOne(id)).rejects.toThrow(NotFoundException);
 
-    
-    }); 
+  describe('findOne', () => {
+    it('should return a drug by ID', async () => {
+      const drugEntity = mockDrugEntity;
+      mockDrugRepository.findOneBy.mockResolvedValue(drugEntity);
 
-  })
+      const result = await service.findOne(dummyId);
+      expect(result).toEqual(drugEntity);
+      expect(mockDrugRepository.findOneBy).toHaveBeenCalledWith({ id: dummyId });
+    });
 
+    it('should throw NotFoundException if drug not found', async () => {
+      mockDrugRepository.findOneBy.mockResolvedValue(null);
+
+      await expect(service.findOne(dummyId)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('findAll', () => {
+    it('should return an array of drugs', async () => {
+      const drugs = mockDrugsEntity;
+      mockDrugRepository.find.mockResolvedValue(drugs);
+
+      const paginationDto: PaginationDto = { limit: 10, offset: 0 };
+      const result = await service.findAll(paginationDto);
+      expect(result).toEqual(drugs);
+      expect(mockDrugRepository.find).toHaveBeenCalledWith({ take: paginationDto.limit, skip: paginationDto.offset });
+    });
+  });
+
+  describe('update', () => {
+    it('should update a drug', async () => {
+      const updateDrugDto: UpdateDrugDto = { name: 'Tramadol' };
+      const drug = { id: dummyId, ...updateDrugDto };
+      mockDrugRepository.preload.mockResolvedValue(drug);
+      mockDrugRepository.save.mockResolvedValue(drug);
+      mockDrugRepository.findOneBy.mockResolvedValue(drug);
+
+      const result = await service.update(dummyId, updateDrugDto);
+      expect(result).toEqual(drug);
+      expect(mockDrugRepository.preload).toHaveBeenCalledWith({ id: dummyId, ...updateDrugDto });
+      expect(mockDrugRepository.save).toHaveBeenCalledWith(drug);
+    });
+
+    it('should throw NotFoundException if drug not found', async () => {
+      const updateDrugDto: UpdateDrugDto = { name: 'Tramadol' };
+      mockDrugRepository.preload.mockResolvedValue(null);
+
+      await expect(service.update(dummyId, updateDrugDto)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove a drug', async () => {
+      const drug = { id: dummyId, name: 'Morfina' };
+      mockDrugRepository.findOneBy.mockResolvedValue(drug);
+      mockDrugRepository.remove.mockResolvedValue(drug);
+
+      await service.remove(dummyId);
+      expect(mockDrugRepository.findOneBy).toHaveBeenCalledWith({ id: dummyId });
+      expect(mockDrugRepository.remove).toHaveBeenCalledWith(drug);
+    });
+
+    it('should throw NotFoundException if drug not found', async () => {
+      mockDrugRepository.findOneBy.mockResolvedValue(null);
+
+      await expect(service.remove(dummyId)).rejects.toThrow(NotFoundException);
+    });
+  });
 
 });

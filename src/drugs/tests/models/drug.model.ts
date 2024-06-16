@@ -1,22 +1,40 @@
-// import { MockModel } from 'common/models/mock.model';
-import { MockModel } from 'src/common/models/mock.model';
+import { CreateDrugDto } from 'src/drugs/dto/create-drug.dto';
 import { Drug } from 'src/drugs/entities/drug.entity';
 
-export const mockDrug: Drug = {
+export const mockDrugEntity: Drug = {
   id: '6a3a6c18-2197-4f27-8e44-e8c87cd1d5a6',
   name: 'Morfina',
   approved: true,
   max_dose: 3,
   min_dose: 1,
-  available_at: new Date(),
+  available_at: new Date('2024-06-14'),
 };
 
-export class DrugModel extends MockModel<Drug> {
-  protected entityStub = mockDrug;
+export const dummyId = '6a3a6c18-2197-4f27-8e44-e8c87cd1d5a6';
+
+export const mockDrugDto: CreateDrugDto = {
+  name: 'Morfina',
+  approved: true,
+  max_dose: 3,
+  min_dose: 1,
+  available_at: new Date('2024-06-14')
 }
 
-export class DrugModelNull extends MockModel<undefined> {
-  protected entityStub = undefined;
-}
-
-export const dummyId = '6a3a6c18-2197-4f27-8e44-e8c87cd1d5a6'
+export const mockDrugsEntity: Drug[] = [
+  {
+    id: '6a3a6c18-2197-4f27-8e44-e8c87cd1d5a6',
+    name: 'Morfina',
+    approved: true,
+    max_dose: 3,
+    min_dose: 1,
+    available_at: new Date('2024-06-14'),
+  },
+  {
+    id: 'a436911f-d92f-4c41-bb93-0597e491da61',
+    name: 'Insulina',
+    approved: true,
+    max_dose: 3,
+    min_dose: 1,
+    available_at: new Date('2024-06-14'),
+  },
+];
