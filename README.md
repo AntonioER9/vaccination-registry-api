@@ -20,7 +20,7 @@ docker-compose up -d
 ```
 yarn run test:cov
 ```
-
+```
 yarn run test:cov
 yarn run v1.22.21
 $ jest --coverage
@@ -85,3 +85,4 @@ Snapshots:   0 total
 Time:        7.932 s, estimated 8 s
 Ran all test suites.
 ✨  Done in 9.12s.
+```
