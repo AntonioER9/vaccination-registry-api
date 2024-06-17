@@ -9,9 +9,10 @@
 2. ```yarn install```
 3. Clonar el archivo ```.env.template``` y renombrarlo a ```.env```
 4. Cambiar las variables de entorno
-5. Levantar la base de datos
+5. Levantar la base de datos en contenedor docker
 ```
 docker-compose up -d
 ```
 
 6. Levantar el proyecto: ```yarn start:dev```
+7. Ejecutar los endpoints ya sea en swagger (http://localhost:3000/api) o importarlo en postman (API_Documentation.postman_collection.json)
