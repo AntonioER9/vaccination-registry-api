@@ -9,8 +9,8 @@ import { UnauthorizedException, BadRequestException, InternalServerErrorExceptio
 import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/auth/entities/user.entity';
 import { mockJwtService, mockUserRepository } from 'src/auth/tests/__mocks__/auth.service';
-import { CreateUserDto } from 'src/auth/dto';
-import { mockCreateUserDto, mockCreateUserResponse, mockHashedPassword, mockJwt, mockUserEntity } from 'src/auth/tests/models/auth.model';
+import { CreateUserDto, LoginUserDto } from 'src/auth/dto';
+import { mockCreateUserDto, mockCreateUserResponse, mockHashedPassword, mockJwt, mockLoginUserDto, mockLoginUserResponse, mockUserEntity } from 'src/auth/tests/models/auth.model';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -44,18 +44,16 @@ describe('AuthService', () => {
   describe('create', () => {
     it('should create a user', async () => {
       const createUserDto: CreateUserDto = mockCreateUserDto;
-      const hashedPassword = mockHashedPassword;
       const user = mockUserEntity;
 
-      jest.spyOn(bcrypt, 'hashSync').mockReturnValue(hashedPassword);
-      mockUserRepository.create.mockReturnValue(user);
-      mockUserRepository.save.mockResolvedValue(user);
+      jest.spyOn(bcrypt, 'hashSync').mockReturnValue(mockHashedPassword);
+      mockUserRepository.create.mockReturnValue(mockUserEntity);
+      mockUserRepository.save.mockResolvedValue(mockUserEntity);
       mockJwtService.sign.mockReturnValue(mockJwt);
 
-      const result = await service.create(mockCreateUserDto);
+      const result = await service.create(createUserDto);
 
       expect(result).toEqual(mockCreateUserResponse);
-      // expect(mockUserRepository.create).toHaveBeenCalledWith(user);
       expect(mockUserRepository.save).toHaveBeenCalledWith(user);
     });
 
@@ -67,45 +65,39 @@ describe('AuthService', () => {
     });
   });
 
-  // describe('login', () => {
-  //   it('should login a user', async () => {
-  //     const loginUserDto: LoginUserDto = { email: 'test@example.com', password: 'test123' };
-  //     const user = { id: '1', email: 'test@example.com', name: 'Test', password: 'hashedPassword' };
+  describe('login', () => {
+    it('should login a user', async () => {
+      const loginUserDto: LoginUserDto = mockLoginUserDto;
+      const user = mockUserEntity;
 
-  //     mockUserRepository.findOne.mockResolvedValue(user);
-  //     jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
-  //     mockJwtService.sign.mockReturnValue('jwt-token');
+      mockUserRepository.findOne.mockResolvedValue(user);
+      jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
+      mockJwtService.sign.mockReturnValue(mockJwt);
 
-  //     const result = await service.login(loginUserDto);
-  //     expect(result).toEqual({
-  //       id: '1',
-  //       email: 'test@example.com',
-  //       name: 'Test',
-  //       token: 'jwt-token',
-  //     });
-  //     expect(mockUserRepository.findOne).toHaveBeenCalledWith({
-  //       where: { email: 'test@example.com' },
-  //       select: { email: true, password: true, id: true, name: true },
-  //     });
-  //     expect(bcrypt.compareSync).toHaveBeenCalledWith('test123', 'hashedPassword');
-  //   });
+      const result = await service.login(loginUserDto);
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { email: 'test@gmail.com' },
+        select: { email: true, password: true, id: true, name: true },
+      });
+      expect(bcrypt.compareSync).toHaveBeenCalledWith('Abc123', result.password);
+    });
 
-  //   it('should throw UnauthorizedException if user not found', async () => {
-  //     const loginUserDto: LoginUserDto = { email: 'test@example.com', password: 'test123' };
+    it('should throw UnauthorizedException if user not found', async () => {
+      const loginUserDto: LoginUserDto = mockLoginUserDto;
 
-  //     mockUserRepository.findOne.mockResolvedValue(null);
+      mockUserRepository.findOne.mockResolvedValue(null);
 
-  //     await expect(service.login(loginUserDto)).rejects.toThrow(UnauthorizedException);
-  //   });
+      await expect(service.login(loginUserDto)).rejects.toThrow(UnauthorizedException);
+    });
 
-  //   it('should throw UnauthorizedException if password is invalid', async () => {
-  //     const loginUserDto: LoginUserDto = { email: 'test@example.com', password: 'test123' };
-  //     const user = { id: '1', email: 'test@example.com', name: 'Test', password: 'hashedPassword' };
+    it('should throw UnauthorizedException if password is invalid', async () => {
+      const loginUserDto: LoginUserDto = mockLoginUserDto;
+      const user = mockUserEntity;
 
-  //     mockUserRepository.findOne.mockResolvedValue(user);
-  //     jest.spyOn(bcrypt, 'compareSync').mockReturnValue(false);
+      mockUserRepository.findOne.mockResolvedValue(user);
+      jest.spyOn(bcrypt, 'compareSync').mockReturnValue(false);
 
-  //     await expect(service.login(loginUserDto)).rejects.toThrow(UnauthorizedException);
-  //   });
-  // });
+      await expect(service.login(loginUserDto)).rejects.toThrow(UnauthorizedException);
+    });
+  });
 });
