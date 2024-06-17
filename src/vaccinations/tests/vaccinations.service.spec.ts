@@ -3,13 +3,12 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DrugsService } from 'src/drugs/drugs.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { Drug } from 'src/drugs/entities/drug.entity';
 import { mockDrugsService, mockVaccinationRepository } from 'src/vaccinations/tests/__mocks__/vaccinations.service';
 import { CreateVaccinationDto } from 'src/vaccinations/dto/create-vaccination.dto';
-import { dummyVaccinationId, mockVaccinationDto, mockVaccinationEntity, mockVaccinationsEntity } from 'src/vaccinations/tests/models/vaccination.model';
+import { dummyVaccinationId, mockVaccinationDto, mockVaccinationEntity, mockVaccinationErrorDateDto, mockVaccinationErrorDoseDto, mockVaccinationsEntity } from 'src/vaccinations/tests/models/vaccination.model';
 import { VaccinationsService } from 'src/vaccinations/vaccinations.service';
 import { Vaccination } from 'src/vaccinations/entities/vaccination.entity';
-import { mockDrugEntity } from 'src/drugs/tests/models/drug.model';
+import { mockDrugDisapprovedEntity, mockDrugEntity } from 'src/drugs/tests/models/drug.model';
 import { UpdateVaccinationDto } from 'src/vaccinations/dto/update-vaccination.dto';
 
 
@@ -53,6 +52,30 @@ describe('VaccinationsService', () => {
       expect(drugsService.findOne).toHaveBeenCalledWith(createVaccinationDto.drugId);
       expect(vaccinationRepository.save).toHaveBeenCalledWith(savedVaccination);
     });
+
+    it('should throw a BadRequestException if vaccination dose is not permitted', () => {
+      const createVaccinationDto: CreateVaccinationDto = mockVaccinationErrorDoseDto;
+
+      drugsService.findOne.mockResolvedValue(mockDrugEntity);
+      
+      expect(() => service.drugValidation(mockDrugEntity, createVaccinationDto)).toThrow(BadRequestException);
+    });
+
+    it('should throw a BadRequestException if vaccination date is not permitted', () => {
+      const createVaccinationDto: CreateVaccinationDto = mockVaccinationErrorDateDto;
+
+      drugsService.findOne.mockResolvedValue(mockDrugEntity);
+      
+      expect(() => service.drugValidation(mockDrugEntity, createVaccinationDto)).toThrow(BadRequestException);
+    });
+
+    it('should throw a BadRequestException if drug is not approved', () => {
+      const createVaccinationDto: CreateVaccinationDto = mockVaccinationDto;
+
+      drugsService.findOne.mockResolvedValue(mockDrugDisapprovedEntity);
+      
+      expect(() => service.drugValidation(mockDrugDisapprovedEntity, createVaccinationDto)).toThrow(BadRequestException);
+    });
   });
 
   describe('findOne', () => {
@@ -68,7 +91,7 @@ describe('VaccinationsService', () => {
     it('should throw a NotFoundException if vaccination is not found', async () => {
       vaccinationRepository.findOneBy.mockResolvedValue(null);
 
-      await expect(service.findOne('some-id')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(dummyVaccinationId)).rejects.toThrow(NotFoundException);
     });
   });
 

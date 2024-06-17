@@ -28,6 +28,20 @@ export const mockVaccinationDto: CreateVaccinationDto = {
   date: new Date('2024-06-14')
 }
 
+export const mockVaccinationErrorDoseDto: CreateVaccinationDto = {
+  name: 'test',
+  dose: 4,
+  drugId: '6a3a6c18-2197-4f27-8e44-e8c87cd1d5a6',
+  date: new Date('2024-06-14')
+}
+
+export const mockVaccinationErrorDateDto: CreateVaccinationDto = {
+  name: 'test',
+  dose: 2,
+  drugId: '6a3a6c18-2197-4f27-8e44-e8c87cd1d5a6',
+  date: new Date('2024-05-14')
+}
+
 export const mockVaccinationsEntity: Vaccination[] = [
   {
     id: '15464723-6d93-4a37-9c57-30a41a2edf34',
