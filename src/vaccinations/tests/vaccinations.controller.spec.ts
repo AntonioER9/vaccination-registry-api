@@ -1,70 +1,82 @@
-// import { Test, TestingModule } from '@nestjs/testing';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { Test, TestingModule } from '@nestjs/testing';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { CreateVaccinationDto } from 'src/vaccinations/dto/create-vaccination.dto';
+import { UpdateVaccinationDto } from 'src/vaccinations/dto/update-vaccination.dto';
+import { mockVaccinationsService } from 'src/vaccinations/tests/__mocks__/vaccinations.service';
+import { dummyVaccinationId, mockVaccinationDto } from 'src/vaccinations/tests/models/vaccination.model';
+import { VaccinationsController } from 'src/vaccinations/vaccinations.controller';
+import { VaccinationsService } from 'src/vaccinations/vaccinations.service';
 
-// describe('DrugsController', () => {
-//   let controller: DrugsController;
-//   let service: DrugsService;
 
-//   beforeEach(async () => {
-//     const module: TestingModule = await Test.createTestingModule({
-//       imports: [
-//         PassportModule.register({ defaultStrategy: 'jwt' }),
-//         JwtModule.register({
-//           secret: 'your-secret-key',
-//           signOptions: { expiresIn: '60s' },
-//         }),
-//       ],
-//       controllers: [DrugsController],
-//       providers: [
-//         {
-//           provide: DrugsService,
-//           useValue: mockDrugsService,
-//         },
-//       ],
-//     }).compile();
+describe('VaccinationsController', () => {
+  let controller: VaccinationsController;
+  let service: VaccinationsService;
 
-//     controller = module.get<DrugsController>(DrugsController);
-//     service = module.get<DrugsService>(DrugsService);
-//   });
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        PassportModule.register({ defaultStrategy: 'jwt' }),
+        JwtModule.register({
+          secret: 'your-secret-key',
+          signOptions: { expiresIn: '60s' },
+        }),
+      ],
+      controllers: [VaccinationsController],
+      providers: [
+        {
+          provide: VaccinationsService,
+          useValue: mockVaccinationsService,
+        },
+      ],
+    })
+    .compile();
 
-//   it('should be defined', () => {
-//     expect(controller).toBeDefined();
-//   });
+    controller = module.get<VaccinationsController>(VaccinationsController);
+    service = module.get<VaccinationsService>(VaccinationsService);
+  });
 
-//   it('should create a drug', async () => {
-//     const createDrugDto: CreateDrugDto = mockDrugDto;
-//     expect(await controller.create(createDrugDto)).toEqual({
-//       id: expect.any(String),
-//       ...createDrugDto,
-//     });
-//     expect(service.create).toHaveBeenCalledWith(createDrugDto);
-//   });
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
 
-//   it('should return an array of drugs', async () => {
-//     const paginationDto: PaginationDto = { limit: 10, offset: 0 };
-//     expect(await controller.findAll(paginationDto)).toHaveLength(2);
-//     expect(service.findAll).toHaveBeenCalledWith(paginationDto);
-//   });
+  describe('create', () => {
+    it('should create a vaccination', async () => {
+      const dto: CreateVaccinationDto = mockVaccinationDto;
+      expect(await controller.create(dto)).toEqual({
+        id: dummyVaccinationId,
+        ...dto,
+      });
+      expect(service.create).toHaveBeenCalledWith(dto);
+    });
+  });
 
-//   it('should return a single drug', async () => {
-//     const id = dummyId;
-//     expect(await controller.findOne(id)).toEqual(mockDrugEntity);
-//     expect(service.findOne).toHaveBeenCalledWith(id);
-//   });
+  describe('findAll', () => {
+    it('should return an array of vaccinations', async () => {
+      const dto: PaginationDto = { limit: 10, offset: 0 };
+      expect(await controller.findAll(dto)).toHaveLength(2);
+      expect(service.findAll).toHaveBeenCalledWith(dto);
+    });
+  });
 
-//   it('should update a drug', async () => {
-//     const id = dummyId;
-//     const updateDrugDto: UpdateDrugDto = { name: 'Tramadol' };
-//     expect(await controller.update(id, updateDrugDto)).toEqual({
-//       id,
-//       ...updateDrugDto,
-//     });
-//     expect(service.update).toHaveBeenCalledWith(id, updateDrugDto);
-//   });
+  describe('update', () => {
+    it('should update a vaccination', async () => {
+      const dto: UpdateVaccinationDto = { name: 'Updated Vaccine' };
+      const id = dummyVaccinationId;
+      expect(await controller.update(id, dto)).toEqual({
+        id,
+        ...dto,
+      });
+      expect(service.update).toHaveBeenCalledWith(id, dto);
+    });
+  });
 
-//   it('should remove a drug', async () => {
-//     const id = dummyId;
-//     expect(await controller.remove(id)).toEqual({ id });
-//     expect(service.remove).toHaveBeenCalledWith(id);
-//   });
-
-// });
+  describe('remove', () => {
+    it('should remove a vaccination', async () => {
+      const id = dummyVaccinationId;
+      expect(await controller.remove(id)).toEqual({ id });
+      expect(service.remove).toHaveBeenCalledWith(id);
+    });
+  });
+});

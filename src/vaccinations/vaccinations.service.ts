@@ -112,9 +112,11 @@ export class VaccinationsService {
     }
 
     if (date < available_at) {
-      console.log(date);
-      console.log(available_at);
       throw new BadRequestException(`Date vaccination is not permitted`);
+    }
+
+    if (!drug.approved) {
+      throw new BadRequestException(`Drug is not approved for this vaccination`);
     }
 
     return true;

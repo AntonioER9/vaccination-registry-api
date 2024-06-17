@@ -1,137 +1,131 @@
-// import { BadRequestException, NotFoundException } from "@nestjs/common";
-// import { JwtModule } from "@nestjs/jwt";
-// import { PassportModule } from "@nestjs/passport";
-// import { Test, TestingModule } from "@nestjs/testing";
-// import { getRepositoryToken } from "@nestjs/typeorm";
-// import { PaginationDto } from "src/common/dtos/pagination.dto";
-// import { DrugsService } from "src/drugs/drugs.service";
-// import { CreateDrugDto } from "src/drugs/dto/create-drug.dto";
-// import { UpdateDrugDto } from "src/drugs/dto/update-drug.dto";
-// import { Drug } from "src/drugs/entities/drug.entity";
-// import { mockDrugRepository } from "src/drugs/tests/__mocks__/drugs.service";
-// import { dummyId, mockDrugDto, mockDrugEntity, mockDrugsEntity } from "src/drugs/tests/models/drug.model";
-// import { Repository } from "typeorm";
-
-// describe('DrugsService with data', () => {
-//   let service: DrugsService;
-//   let repository: Repository<Drug>
-
-//   beforeEach(async () => {
-//     const module: TestingModule = await Test.createTestingModule({
-//       imports: [
-//         PassportModule.register({ defaultStrategy: 'jwt' }),
-//         JwtModule.register({
-//           secret: 'your-secret-key', 
-//           signOptions: { expiresIn: '60s' },
-//         }),
-//       ],
-//       providers: [
-//         DrugsService,
-//         {
-//           provide: getRepositoryToken(Drug),
-//           useValue: mockDrugRepository,
-//         }
-//       ],
-//     }).compile();
-
-//     service = module.get<DrugsService>(DrugsService);
-//     repository = module.get<Repository<Drug>>(getRepositoryToken(Drug));
-//   });
-
-//   it('should be defined', () => {
-//     expect(service).toBeDefined();
-//   });
-
-//   describe('create', () => {
-//     it('should create a drug', async () => {
-//       const createDrugDto: CreateDrugDto = mockDrugDto;
-//       const drug = mockDrugEntity;
-
-//       mockDrugRepository.create.mockReturnValue(drug);
-//       mockDrugRepository.save.mockResolvedValue(drug);
-
-//       const result = await service.create(createDrugDto);
-//       expect(result).toEqual(drug);
-//       expect(mockDrugRepository.create).toHaveBeenCalledWith(createDrugDto);
-//       expect(mockDrugRepository.save).toHaveBeenCalledWith(drug);
-//     });
-
-//     it('should handle database errors', async () => {
-//       const createDrugDto: CreateDrugDto = mockDrugDto;
-//       mockDrugRepository.save.mockRejectedValue({ code: '23505', detail: 'Duplicate entry' });
-
-//       await expect(service.create(createDrugDto)).rejects.toThrow(BadRequestException);
-//     });
-//   });
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { DrugsService } from 'src/drugs/drugs.service';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { Drug } from 'src/drugs/entities/drug.entity';
+import { mockDrugsService, mockVaccinationRepository } from 'src/vaccinations/tests/__mocks__/vaccinations.service';
+import { CreateVaccinationDto } from 'src/vaccinations/dto/create-vaccination.dto';
+import { dummyVaccinationId, mockVaccinationDto, mockVaccinationEntity, mockVaccinationsEntity } from 'src/vaccinations/tests/models/vaccination.model';
+import { VaccinationsService } from 'src/vaccinations/vaccinations.service';
+import { Vaccination } from 'src/vaccinations/entities/vaccination.entity';
+import { mockDrugEntity } from 'src/drugs/tests/models/drug.model';
+import { UpdateVaccinationDto } from 'src/vaccinations/dto/update-vaccination.dto';
 
 
-//   describe('findOne', () => {
-//     it('should return a drug by ID', async () => {
-//       const drugEntity = mockDrugEntity;
-//       mockDrugRepository.findOneBy.mockResolvedValue(drugEntity);
+describe('VaccinationsService', () => {
+  let service: VaccinationsService;
+  let vaccinationRepository;
+  let drugsService;
 
-//       const result = await service.findOne(dummyId);
-//       expect(result).toEqual(drugEntity);
-//       expect(mockDrugRepository.findOneBy).toHaveBeenCalledWith({ id: dummyId });
-//     });
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        VaccinationsService,
+        { provide: getRepositoryToken(Vaccination), useValue: mockVaccinationRepository() },
+        { provide: DrugsService, useValue: mockDrugsService() },
+      ],
+    }).compile();
 
-//     it('should throw NotFoundException if drug not found', async () => {
-//       mockDrugRepository.findOneBy.mockResolvedValue(null);
+    service = module.get<VaccinationsService>(VaccinationsService);
+    vaccinationRepository = module.get<Repository<Vaccination>>(getRepositoryToken(Vaccination));
+    drugsService = module.get<DrugsService>(DrugsService);
+  });
 
-//       await expect(service.findOne(dummyId)).rejects.toThrow(NotFoundException);
-//     });
-//   });
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
 
-//   describe('findAll', () => {
-//     it('should return an array of drugs', async () => {
-//       const drugs = mockDrugsEntity;
-//       mockDrugRepository.find.mockResolvedValue(drugs);
+  describe('create', () => {
+    it('should create a vaccination', async () => {
+      const createVaccinationDto: CreateVaccinationDto = mockVaccinationDto;
 
-//       const paginationDto: PaginationDto = { limit: 10, offset: 0 };
-//       const result = await service.findAll(paginationDto);
-//       expect(result).toEqual(drugs);
-//       expect(mockDrugRepository.find).toHaveBeenCalledWith({ take: paginationDto.limit, skip: paginationDto.offset });
-//     });
-//   });
+      const savedVaccination = {
+        id: dummyVaccinationId,
+        ...createVaccinationDto,
+      };    
+      drugsService.findOne.mockResolvedValue(mockDrugEntity);
+      vaccinationRepository.create.mockReturnValue(savedVaccination);
+      vaccinationRepository.save.mockResolvedValue(savedVaccination);
+      
+      const result = await service.create(createVaccinationDto);
+      expect(result).toEqual(savedVaccination);
+      expect(drugsService.findOne).toHaveBeenCalledWith(createVaccinationDto.drugId);
+      expect(vaccinationRepository.save).toHaveBeenCalledWith(savedVaccination);
+    });
+  });
 
-//   describe('update', () => {
-//     it('should update a drug', async () => {
-//       const updateDrugDto: UpdateDrugDto = { name: 'Tramadol' };
-//       const drug = { id: dummyId, ...updateDrugDto };
-//       mockDrugRepository.preload.mockResolvedValue(drug);
-//       mockDrugRepository.save.mockResolvedValue(drug);
-//       mockDrugRepository.findOneBy.mockResolvedValue(drug);
+  describe('findOne', () => {
+    it('should return a vaccination if found', async () => {
+      const vaccination = mockVaccinationEntity;
+      vaccinationRepository.findOneBy.mockResolvedValue(vaccination);
 
-//       const result = await service.update(dummyId, updateDrugDto);
-//       expect(result).toEqual(drug);
-//       expect(mockDrugRepository.preload).toHaveBeenCalledWith({ id: dummyId, ...updateDrugDto });
-//       expect(mockDrugRepository.save).toHaveBeenCalledWith(drug);
-//     });
+      const result = await service.findOne(dummyVaccinationId);
+      expect(result).toEqual(vaccination);
+      expect(vaccinationRepository.findOneBy).toHaveBeenCalledWith({ id: dummyVaccinationId });
+    });
 
-//     it('should throw NotFoundException if drug not found', async () => {
-//       const updateDrugDto: UpdateDrugDto = { name: 'Tramadol' };
-//       mockDrugRepository.preload.mockResolvedValue(null);
+    it('should throw a NotFoundException if vaccination is not found', async () => {
+      vaccinationRepository.findOneBy.mockResolvedValue(null);
 
-//       await expect(service.update(dummyId, updateDrugDto)).rejects.toThrow(NotFoundException);
-//     });
-//   });
+      await expect(service.findOne('some-id')).rejects.toThrow(NotFoundException);
+    });
+  });
 
-//   describe('remove', () => {
-//     it('should remove a drug', async () => {
-//       const drug = { id: dummyId, name: 'Morfina' };
-//       mockDrugRepository.findOneBy.mockResolvedValue(drug);
-//       mockDrugRepository.remove.mockResolvedValue(drug);
+  describe('findAll', () => {
+    it('should return an array of vaccinations', async () => {
+      const vaccinations = mockVaccinationsEntity;
+      vaccinationRepository.find.mockResolvedValue(vaccinations);
 
-//       await service.remove(dummyId);
-//       expect(mockDrugRepository.findOneBy).toHaveBeenCalledWith({ id: dummyId });
-//       expect(mockDrugRepository.remove).toHaveBeenCalledWith(drug);
-//     });
+      const paginationDto = { limit: 10, offset: 0 };
+      const result = await service.findAll(paginationDto);
+      expect(result).toEqual(vaccinations);
+      expect(vaccinationRepository.find).toHaveBeenCalledWith({
+        take: 10,
+        skip: 0,
+      });
+    });
+  });
 
-//     it('should throw NotFoundException if drug not found', async () => {
-//       mockDrugRepository.findOneBy.mockResolvedValue(null);
+  describe('update', () => {
+    it('should update a vaccination', async () => {
+      const updateVaccinationDto: UpdateVaccinationDto = { name: 'test' };
+      const existingVaccination = { id: dummyVaccinationId, name: 'Vaccine1' };
+      const updatedVaccination = { id: dummyVaccinationId, ...updateVaccinationDto };
 
-//       await expect(service.remove(dummyId)).rejects.toThrow(NotFoundException);
-//     });
-//   });
+      vaccinationRepository.preload.mockResolvedValue(existingVaccination);
+      vaccinationRepository.save.mockResolvedValue(updatedVaccination);
+      service.findOne = jest.fn().mockResolvedValue(updatedVaccination);
 
-// });
+      const result = await service.update(dummyVaccinationId, updateVaccinationDto);
+      expect(result).toEqual(updatedVaccination);
+      expect(vaccinationRepository.preload).toHaveBeenCalledWith({ id: dummyVaccinationId, ...updateVaccinationDto });
+      expect(vaccinationRepository.save).toHaveBeenCalledWith(existingVaccination);
+    });
+
+    it('should throw a NotFoundException if vaccination is not found', async () => {
+      vaccinationRepository.preload.mockResolvedValue(null);
+
+      await expect(service.update(dummyVaccinationId, {} as UpdateVaccinationDto)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove a vaccination', async () => {
+      const vaccination = { id: dummyVaccinationId, name: 'test' };
+      service.findOne = jest.fn().mockResolvedValue(vaccination);
+      vaccinationRepository.remove.mockResolvedValue(vaccination);
+
+      const result = await service.remove(dummyVaccinationId);
+      expect(result).toBeUndefined();
+      expect(service.findOne).toHaveBeenCalledWith(dummyVaccinationId);
+      expect(vaccinationRepository.remove).toHaveBeenCalledWith(vaccination);
+    });
+
+    it('should throw a NotFoundException if vaccination is not found', async () => {
+      service.findOne = jest.fn().mockRejectedValue(new NotFoundException());
+
+      await expect(service.remove('some-id')).rejects.toThrow(NotFoundException);
+    });
+  });
+});
